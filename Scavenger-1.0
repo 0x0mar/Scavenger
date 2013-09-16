@@ -1,0 +1,118 @@
+#!/usr/bin/python
+
+from shodan import WebAPI  #shodan API requirements
+import whois
+import sys
+import urllib
+import thread
+import os
+from bs4 import BeautifulSoup as BS
+
+
+SHODAN_API_KEY = "insert API here"
+api = WebAPI(SHODAN_API_KEY)
+
+def menu(): #menu display
+	
+	print """
+		1)Search Exploit-db  
+		2)Search Shodan
+		3)Search Host Location By IP
+		4)WhoIs search
+		5)Menu
+       	"""
+
+def menuOpt(): #submenu opt
+        
+	usrIn = raw_input("\n Enter option: ")
+        if (usrIn == "1"):   
+		srchExploitDB()
+		menu()
+        elif(usrIn == "2"):
+	        srchShodan()
+		menu()	
+	elif(usrIn == "3"):
+		shodanHost()
+		menu()
+	elif(usrIn == "4"):
+		whoisSrch()
+		menu()
+	elif(usrIn == "5"):
+		menu()
+
+def srchShodan():
+	
+	print """\n Popular search terms:
+			- scada
+			- http
+			- webcam
+			- cisco
+			- login
+			- anonymous
+			- ssh
+			- telnet
+			- default
+			- port #
+			- no
+	"""
+	shosearch = raw_input("\n Enter term to search: ")
+	results = api.search(shosearch) #searching based on users preset terms
+	print (shosearch, 'resulted in %s results' % results ['total'])
+	
+	for result in results ['matches']:
+		print 'IP: %s' % result['ip']
+		print result['data']
+		print ''
+
+def shodanHost():
+	
+	ip = raw_input("Enter host IP: ")
+	host = api.host(ip) #looks up geo location
+	
+	print """ 
+		IP: %s
+		Country: %s
+		City: %s
+   		""" %(host['ip'], host.get('country', None), host.get('city',None)) #Printing geo location
+	
+	for item in host['data']:
+		print """
+			Port: %s
+			Banner: %s
+	      	      """ %(item['port'], item['banner'])
+
+
+def table(x):
+
+	if x:
+		return x.startswith("list_explot_description") and not "class2 " in x
+	else:
+		return False
+
+
+def srchExploitDB():
+	srchTerm = raw_input("Enter a term to search:")
+	num = 1
+
+	for num in range (1,10,1):
+		response = urllib.urlopen('http://www.exploit-db.com/search/?action=search&filter_page=' +str(num) +'&filter_description='+ srchTerm +'&filter_exploit_text=&filter_author=&filter_platform=0&filter_type=0&filter_lang_id=0&filter_port=&filter_osvdb=&filter_cve=')	
+
+		soup = BS(response)
+		rows = soup.findAll('td', {'class': table})
+		for row in rows:
+			print row
+
+		num += 1	
+
+def whoisSrch():
+	
+	site = raw_input('Enter IP or URL: ')
+	result = os.system('whois '+ site)
+	print result
+
+
+#############start of main############
+menu()
+while(1): #continuously prompt for menu option
+	menuOpt()
+	
