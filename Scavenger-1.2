@@ -6,18 +6,27 @@ try:
 	import sys
 	from shodan import WebAPI  #shodan API requirements
 	import ExploitDB
+	import ShodanSearch
 	import argparse
 except ImportError as e:
 	print("Oh no! You don't have %s" %e)
 	sys.exit()
 
-SHODAN_API_KEY = "" #Enter API key here
+SHODAN_API_KEY = "c1twrStvBUBJHq7euqxhap1XOZuMmouY" #Enter API key here
 api = WebAPI(SHODAN_API_KEY)
 
-parser = argparse.ArgumentParser()
+# Argument parsing shenanghains
+parser = argparse.ArgumentParser(description="A command line database query tool")
 parser.add_argument("-db", "--exploit-db", help="Enter Exploit-db search term!")
 parser.add_argument("-sh", "--shodan", help="Enter Shodan search term!")
 parser.add_argument("-w", "--whois", help="Enter domain information for query!")
 parser.parse_args()
 args = parser.parse_args()
+
+#class object initializaiton
+
+
+if args.shodan:
+	sho.srchShodan(args.shodan)
+elif args.exploit:
 
